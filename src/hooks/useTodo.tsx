@@ -57,12 +57,16 @@ const useTodo = (): ITodo => {
       const changedItem = await Api.changeStatusOfItem(id);
       if (changedItem) {
         setCardList((props) => {
-          const changedIndex = props.findIndex(
-            (item) => item.id === changedItem.id
-          );
-          props[changedIndex] = changedItem;
+          const changedIndex = props.findIndex((item) => item.id === id);
 
-          return props;
+          return [
+            ...props.slice(0, changedIndex),
+            {
+              ...props[changedIndex],
+              isActive: !props[changedIndex].isActive,
+            },
+            ...props.slice(changedIndex + 1),
+          ];
         });
       }
     } catch (error) {

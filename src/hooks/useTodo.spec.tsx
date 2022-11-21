@@ -201,7 +201,7 @@ describe("useTodo", () => {
     await waitForElementToBeRemoved(screen.queryByText(/loading/));
 
     expect(
-      screen.getByText(`${mockCardListItem1.id}:${mockCardListItem1.isActive}`)
+      screen.getByText(`${mockCardListItem1.id}:${!mockCardListItem1.isActive}`)
     ).toBeTruthy();
   });
 });

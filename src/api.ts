@@ -15,7 +15,9 @@ class Api {
 
   static async fakeFetchCardList(): Promise<CardListType[]> {
     return new Promise((resolve) => {
-      resolve([]);
+      setTimeout(() => {
+        resolve(mockData);
+      }, 1000);
     });
   }
 

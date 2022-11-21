@@ -2,7 +2,12 @@ import * as React from "react";
 import { mockCardListData } from "../../fakeData";
 import ApiBase from "../../api";
 import MainContainer from "./index";
-import { render, screen, waitFor } from "@testing-library/react";
+import {
+  render,
+  screen,
+  waitFor,
+  waitForElementToBeRemoved,
+} from "@testing-library/react";
 import TodoStoreProvider from "../../providers";
 import userEvent from "@testing-library/user-event";
 import { act } from "react-dom/test-utils";
@@ -62,6 +67,8 @@ describe("<MainContainer/>", () => {
 
     renderScreen();
 
+    await waitForElementToBeRemoved(screen.queryByText(/Loading.../));
+
     expect(screen.getByLabelText(/add item/)).toBeTruthy();
 
     userEvent.type(
@@ -88,6 +95,8 @@ describe("<MainContainer/>", () => {
     ApiBase.fakeAddItemApiCall = mockAddItem;
 
     renderScreen();
+
+    await waitForElementToBeRemoved(screen.queryByText(/Loading.../));
 
     expect(screen.getByLabelText(/add item/)).toBeTruthy();
 
@@ -135,6 +144,8 @@ describe("<MainContainer/>", () => {
     ApiBase.changeStatusOfItem = mockChangeStatus;
 
     renderScreen();
+
+    await waitForElementToBeRemoved(screen.queryByText(/Loading.../));
 
     expect(screen.getByLabelText(/add item/)).toBeTruthy();
 

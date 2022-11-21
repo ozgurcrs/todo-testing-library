@@ -45,7 +45,7 @@ const ListWrapper = styled(Box)`
 `;
 
 const MainContainer: FC = () => {
-  const { cardList, removeItem, addItem, changeStatusOfItem } =
+  const { cardList, removeItem, addItem, changeStatusOfItem, loading } =
     useContext(TodoStoreContext);
 
   const handleSaveItem = async (e: any) => {
@@ -55,7 +55,9 @@ const MainContainer: FC = () => {
     }
   };
 
-  return (
+  return loading ? (
+    <h1>Loading...</h1>
+  ) : (
     <Wrapper>
       <FormWrapper>
         <label>
