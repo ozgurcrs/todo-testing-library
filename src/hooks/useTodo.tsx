@@ -1,25 +1,30 @@
 import { useEffect, useState } from "react";
 import { CardListType } from "../models";
+import Api from "../api";
 
 interface ITodo {
   cardList: CardListType[];
   removeItem: (id: string) => void;
-  addItem: (payload: string) => void;
-  changeStatusOfItem: (id: string) => void;
+  addItem: (payload: string) => Promise<void>;
+  changeStatusOfItem: (id: string) => Promise<void>;
+  loading: boolean;
 }
 
-export const useTodo = (): ITodo => {
+const useTodo = (): ITodo => {
   const [cardList, setCardList] = useState<CardListType[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
-  const fetchCardList = () => {
-    const url = "https://6374024c0bb6b698b61a1a35.mockapi.io/api/v1/CardList";
-    fetch(url).then((data) =>
-      data.json().then((response) => {
-        if (response) {
-          setCardList(response);
-        }
-      })
-    );
+  const fetchCardList = async () => {
+    try {
+      setLoading(true);
+      const data = await Api.fakeFetchCardList();
+
+      setCardList(data);
+    } catch (error) {
+      setCardList([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const removeItem = (id: string) => {
@@ -30,29 +35,41 @@ export const useTodo = (): ITodo => {
     setCardList(findRemovingItem);
   };
 
-  const addItem = (data: string) => {
-    setCardList((props) => [
-      ...props,
-      {
-        id: Math.floor(Math.random() * 9999).toString(),
-        text: data,
-        isActive: false,
-        avatar: "https://picsum.photos/300/300",
-      },
-    ]);
+  const addItem = async (data: string): Promise<void> => {
+    try {
+      setLoading(true);
+
+      const addedItem = await Api.fakeAddItemApiCall(data);
+
+      setCardList((props) => {
+        return [...props, addedItem];
+      });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const changeStatusOfItem = (id: string) => {
-    const changeStatus = cardList.map((item) =>
-      item.id === id
-        ? {
-            ...item,
-            isActive: !item.isActive,
-          }
-        : item
-    );
+  const changeStatusOfItem = async (id: string) => {
+    try {
+      setLoading(true);
+      const changedItem = await Api.changeStatusOfItem(id);
+      if (changedItem) {
+        setCardList((props) => {
+          const changedIndex = props.findIndex(
+            (item) => item.id === changedItem.id
+          );
+          props[changedIndex] = changedItem;
 
-    setCardList(changeStatus);
+          return props;
+        });
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -64,5 +81,8 @@ export const useTodo = (): ITodo => {
     removeItem,
     addItem,
     changeStatusOfItem,
+    loading,
   };
 };
+
+export default useTodo;

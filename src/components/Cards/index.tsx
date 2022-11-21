@@ -28,7 +28,7 @@ const List = styled(Box)`
 type CardsType = {
   cardList: CardListType[];
   removeItem: (id: string) => void;
-  changeStatusOfItem: (id: string) => void;
+  changeStatusOfItem: (id: string) => Promise<void>;
 };
 
 export const Cards: FC<CardsType> = ({
@@ -40,37 +40,40 @@ export const Cards: FC<CardsType> = ({
     removeItem(id);
   };
 
-  const handleChange = (id: string) => {
-    changeStatusOfItem(id);
+  const handleChange = async (id: string) => {
+    await changeStatusOfItem(id);
   };
 
   return (
     <>
-      {cardList.map(({ id, text, isActive, avatar }) => (
-        <List key={id} data-testid={`card-${id}-data-test-id`}>
-          <Checkbox
-            checked={isActive}
-            data-testid={`checkbox-${id}-data-test-id`}
-            onChange={() => handleChange(id)}
-          />
-          <img src={avatar} alt="" loading="lazy" />
-          <Typography
-            data-testid={`typography-${id}-data-test-id`}
-            sx={{
-              minWidth: "70%",
-              textDecoration: isActive ? "line-through" : "none",
-            }}
-          >
-            {text}
-          </Typography>
-          <Button
-            data-testid={`delete-${id}-data-test-id`}
-            onClick={() => onDelete(id)}
-          >
-            Delete
-          </Button>
-        </List>
-      ))}
+      {cardList.length > 0
+        ? cardList.map((item) => (
+            <List key={item?.id} data-testid={`card-${item?.id}-data-test-id`}>
+              <input
+                type={"checkbox"}
+                checked={item?.isActive}
+                data-testid={`checkbox-${item?.id}-data-test-id`}
+                onChange={handleChange.bind(this, item?.id)}
+              />
+              <img src={item?.avatar} alt="" loading="lazy" />
+              <Typography
+                data-testid={`typography-${item?.id}-data-test-id`}
+                sx={{
+                  minWidth: "70%",
+                  textDecoration: item?.isActive ? "line-through" : "none",
+                }}
+              >
+                {item?.text}
+              </Typography>
+              <Button
+                data-testid={`delete-${item?.id}-data-test-id`}
+                onClick={() => onDelete(item?.id)}
+              >
+                Delete
+              </Button>
+            </List>
+          ))
+        : null}
     </>
   );
 };

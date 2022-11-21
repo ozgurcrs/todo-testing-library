@@ -1,68 +1,57 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import * as React from "react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-
-import React from "react";
 import { act } from "react-dom/test-utils";
 import { Cards } from ".";
-import { TodoStoreContext } from "../../context";
 import { mockData } from "../../mockData";
 
-const props = {
-  cardList: mockData,
-  removeItem: jest.fn(),
-  changeStatusOfItem: jest.fn(),
-};
+const mockRemoveItem = jest.fn();
+const mockChangeStatusOfItem = jest.fn();
 
-const mockContext = {
-  cardList: mockData,
-  removeItem: jest.fn(),
-  addItem: jest.fn(),
-  changeStatusOfItem: jest.fn(),
-};
-
-const renderContainer = () =>
+const renderContainer = (props = {}) =>
   render(
-    <TodoStoreContext.Provider value={mockContext}>
-      <Cards {...props} />
-    </TodoStoreContext.Provider>
+    <Cards
+      cardList={mockData}
+      removeItem={mockRemoveItem}
+      changeStatusOfItem={mockChangeStatusOfItem}
+      {...props}
+    />
   );
 
 describe("<Cards />", () => {
-  test("component should be render", () => {
+  it("component should be render", () => {
     const { container } = renderContainer();
 
-    expect(container).toMatchSnapshot();
+    expect(container).toBeInTheDocument();
   });
 
-  test("card should be defined on the screen", () => {
-    /*   renderContainer();
+  it("should render cards correctly", () => {
+    renderContainer();
 
-    const getCard = screen.getByTestId("card-1-data-test-id");
+    mockData.forEach((mData) => {
+      const getCard = screen.getByTestId(`card-${mData.id}-data-test-id`);
 
-    expect(getCard).toBeDefined(); */
+      expect(getCard).toBeDefined();
+    });
   });
 
-  test("button should be defined on the screen", () => {
-    /*   renderContainer();
+  it("should render delete buttons correctly", () => {
+    renderContainer();
 
-    const getButton = screen.getByTestId("delete-1-data-test-id");
-
-    expect(getButton).toBeDefined(); */
+    expect(screen.getAllByRole("button", { name: /Delete/i }).length).toEqual(
+      mockData.length
+    );
   });
 
-  test("typography should be defined on the screen", () => {
-    /*  renderContainer();
+  it("should render cards text's correctly", () => {
+    renderContainer();
 
-    const getTypography = screen.getByTestId("typography-1-data-test-id");
-
-    expect(getTypography).toBeDefined();
-
-    const getText = screen.getByText("text 1");
-
-    expect(getText).toBeDefined(); */
+    mockData.forEach((mData) => {
+      expect(screen.getByText(mData.text)).toBeTruthy();
+    });
   });
 
-  test("when checkbox click, text should be line-through", async () => {
+  it("when checkbox click, text should be line-through", async () => {
     renderContainer();
     const getTypography = screen.getByTestId("typography-1-data-test-id");
     expect(getTypography).toBeDefined();
@@ -80,20 +69,20 @@ describe("<Cards />", () => {
     });
   });
 
-  test("when delete button click, text shouldn't be defined on screen", async () => {
-    const { getByTestId } = renderContainer();
-    const getTypography = screen.getByTestId("typography-1-data-test-id");
-    expect(getTypography).toBeDefined();
+  it("should call removeItem function correctly when delete button clicked", async () => {
+    renderContainer();
 
-    const deleteButton = screen.getByTestId("delete-1-data-test-id");
+    mockData.forEach((mData) => {
+      const itemId = mData.id;
 
-    expect(deleteButton).toBeDefined();
+      const deleteButton = screen.getByTestId(`delete-${itemId}-data-test-id`);
 
-    // eslint-disable-next-line testing-library/no-unnecessary-act
-    await act(async () => {
-      fireEvent.click(deleteButton);
-      const text = await screen.findByTestId("typography-1-data-test-id");
-      expect(text).not.toBeDefined();
+      expect(deleteButton).toBeDefined();
+
+      userEvent.click(deleteButton);
+
+      expect(mockRemoveItem).toBeCalled();
+      expect(mockRemoveItem).toBeCalledWith(itemId);
     });
   });
 });

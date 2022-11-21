@@ -48,9 +48,9 @@ const MainContainer: FC = () => {
   const { cardList, removeItem, addItem, changeStatusOfItem } =
     useContext(TodoStoreContext);
 
-  const handleSaveItem = (e: any) => {
+  const handleSaveItem = async (e: any) => {
     if (e.keyCode === 13) {
-      addItem(e.target.value);
+      await addItem(e.target.value);
       e.target.value = "";
     }
   };
@@ -58,7 +58,10 @@ const MainContainer: FC = () => {
   return (
     <Wrapper>
       <FormWrapper>
-        <TextInput onKeyDown={handleSaveItem} />
+        <label>
+          add item:
+          <TextInput onKeyDown={handleSaveItem} />
+        </label>
       </FormWrapper>
 
       <ListWrapper>
